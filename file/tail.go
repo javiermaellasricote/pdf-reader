@@ -22,6 +22,9 @@ func checkTail(pdf *PdfFile) error {
 	if err = checkTailEOF(readBuffer); err != nil {
 		return err
 	}
+	if err = checkTailCrossReference(readBuffer); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -34,8 +37,23 @@ func checkTailEOF(readBuffer []byte) error {
 	return nil
 }
 
-// TODO: unfinished func
-func findLastCrossReference(readBuffer []byte) (int64, error) {
+func checkTailCrossReference(readBuffer []byte) error {
+	tagLength := len(START_XREF_TAG)
+	tagStartIdx, err := findLastCrossReference(readBuffer)
+	if err != nil {
+		return nil
+	}
+	trailingBuffer := readBuffer[(tagLength + tagStartIdx):]
+	trimmedBuffer := bytes.TrimLeft(trailingBuffer, "\n\r\t")
+	if !checkByteIsNumber(trimmedBuffer[0]) {
+		message := "Cross reference must start with integer"
+		return errors.New(FILE_FORMAT_ERROR_PREFIX + message)
+	}
+	return nil
+}
+
+// Finds last cross-reference tag between two EOL characters
+func findLastCrossReference(readBuffer []byte) (int, error) {
 	xRefTag := []byte(START_XREF_TAG)
 	tagLength := len(xRefTag)
 	bufferLength := len(readBuffer)
@@ -45,8 +63,15 @@ func findLastCrossReference(readBuffer []byte) (int64, error) {
 		isMaxIdxValid := maxIdx > 0
 		tagFitsInBuffer := maxIdx+tagLength < bufferLength
 		if !isMaxIdxValid || !tagFitsInBuffer {
-			return 0, errors.New("")
+			return 0, errors.New("Tag not found in buffer")
 		}
+		idx := bytes.LastIndex(readBuffer[:maxIdx], xRefTag)
+		eolPreceedsTag := checkByteIsEOL(readBuffer[idx-1])
+		eolFollowsTag := checkByteIsEOL(readBuffer[idx+tagLength])
+		if eolPreceedsTag && eolFollowsTag {
+			return int(idx), nil
+		}
+		maxIdx = idx
 	}
-	return 0, nil
+	return 0, errors.New("Tag not found in buffer")
 }

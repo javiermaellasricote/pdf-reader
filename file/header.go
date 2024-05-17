@@ -28,7 +28,7 @@ func checkHeader(pdf *PdfFile) error {
 }
 
 func checkHeaderEOL(readBuffer []byte) error {
-	if readBuffer[8] != '\r' && readBuffer[8] != '\n' {
+	if !checkByteIsEOL(readBuffer[8]) {
 		message := "File is not ending header line"
 		return errors.New(FILE_FORMAT_ERROR_PREFIX + message)
 	}
