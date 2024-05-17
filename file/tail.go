@@ -1,6 +1,9 @@
 package file
 
-import "errors"
+import (
+	"bytes"
+	"errors"
+)
 
 func checkTail(pdf *PdfFile) error {
 	var desiredReadLength int64 = 100
@@ -15,6 +18,18 @@ func checkTail(pdf *PdfFile) error {
 	}
 	if int64(length) != desiredReadLength {
 		return errors.New(FILE_TOO_SMALL_ERROR)
+	}
+	if err = checkTailEOF(readBuffer); err != nil {
+		return err
+	}
+	return nil
+}
+
+func checkTailEOF(readBuffer []byte) error {
+	trimmedBuffer := bytes.TrimRight(readBuffer, "\r\n\t")
+	if !bytes.HasSuffix(trimmedBuffer, []byte("%%EOF")) {
+		message := "Missing EOF tag at the end of file"
+		return errors.New(FILE_FORMAT_ERROR_PREFIX + message)
 	}
 	return nil
 }

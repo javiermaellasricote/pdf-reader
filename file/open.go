@@ -15,6 +15,11 @@ func (pdf *PdfFile) Open() error {
 		return err
 	}
 	pdf.size = fileInfo.Size()
-	err = checkHeader(pdf)
+	if err = checkHeader(pdf); err != nil {
+		return err
+	}
+	if err = checkTail(pdf); err != nil {
+		return err
+	}
 	return nil
 }
