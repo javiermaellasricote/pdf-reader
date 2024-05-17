@@ -27,9 +27,26 @@ func checkTail(pdf *PdfFile) error {
 
 func checkTailEOF(readBuffer []byte) error {
 	trimmedBuffer := bytes.TrimRight(readBuffer, "\r\n\t")
-	if !bytes.HasSuffix(trimmedBuffer, []byte("%%EOF")) {
+	if !bytes.HasSuffix(trimmedBuffer, []byte(EOF_TAG)) {
 		message := "Missing EOF tag at the end of file"
 		return errors.New(FILE_FORMAT_ERROR_PREFIX + message)
 	}
 	return nil
+}
+
+// TODO: unfinished func
+func findLastCrossReference(readBuffer []byte) (int64, error) {
+	xRefTag := []byte(START_XREF_TAG)
+	tagLength := len(xRefTag)
+	bufferLength := len(readBuffer)
+	maxIdx := bufferLength
+	maxIters := bufferLength / tagLength
+	for iter := 0; iter < maxIters; iter++ {
+		isMaxIdxValid := maxIdx > 0
+		tagFitsInBuffer := maxIdx+tagLength < bufferLength
+		if !isMaxIdxValid || !tagFitsInBuffer {
+			return 0, errors.New("")
+		}
+	}
+	return 0, nil
 }

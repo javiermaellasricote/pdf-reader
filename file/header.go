@@ -45,7 +45,7 @@ func checkValidVersion(readBuffer []byte) error {
 }
 
 func checkHeaderPrefix(readBuffer []byte) error {
-	if !bytes.HasPrefix(readBuffer, []byte("%PDF-")) {
+	if !bytes.HasPrefix(readBuffer, []byte(PDF_HEADER_PREFIX)) {
 		message := "File is missing the beginning header"
 		return errors.New(FILE_FORMAT_ERROR_PREFIX + message)
 	}
