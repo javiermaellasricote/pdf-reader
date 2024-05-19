@@ -36,8 +36,8 @@ func checkHeaderEOL(readBuffer []byte) error {
 }
 
 func checkValidVersion(readBuffer []byte) error {
-	hasValidMajorVersion := readBuffer[5] == 1
-	hasValidMinorVersion := (readBuffer[7] > '0' && readBuffer[7] < '7')
+	hasValidMajorVersion := string(readBuffer[5]) == "1"
+	hasValidMinorVersion := (string(readBuffer[7]) > "0" && string(readBuffer[7]) <= "7")
 	if !hasValidMajorVersion || !hasValidMinorVersion {
 		return errors.New(VERSION_NOT_SUPPORTED_ERROR)
 	}
