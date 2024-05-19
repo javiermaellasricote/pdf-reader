@@ -12,7 +12,7 @@ func checkTail(pdf *PdfFile) error {
 		return errors.New(FILE_TOO_SMALL_ERROR)
 	}
 	readBuffer := make([]byte, desiredReadLength)
-	length, err := pdf.file.ReadAt(readBuffer, pdf.size)
+	length, err := pdf.file.ReadAt(readBuffer, offset)
 	if err != nil {
 		return err
 	}
